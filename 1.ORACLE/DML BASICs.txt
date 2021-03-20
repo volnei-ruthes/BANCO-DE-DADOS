@@ -1,0 +1,59 @@
+DML - Data Manipulation Language Basic.
+
+>CRUD - READ(SELECT):
+
+SELECT nome, idade 
+FROM cliente
+WHERE idCliente = 1
+GROUP BY
+ORDER BY
+
+>CRUD - UPDATE
+
+UPDATE cliente
+SET nome = 'novoNome', idade = 36
+WHERE idCliente = 1
+
+>CRUD - DELETE
+
+DELETE FROM cliente
+WHERE idCliente=1
+
+>INNER JOIN
+
+SELECT nome, idade, bairro
+FROM cliente C 
+     INNER JOIN endereco E ON P.idendereco = E.idendereco
+
+ou more INNERS
+
+SELECT C.nome, C.idade, E.bairro, E.idendereco, L.LojasNomeReferencia
+FROM cliente C 
+     INNER JOIN endereco E ON P.idendereco = C.idendereco
+     INNER JOIN lojasReferencias L ON P.idlojasreferencias = C.idlojasreferencias
+	 
+>LEFT JOIN
+
+SELECT nome, idade, bairro
+FROM cliente C 
+     LEFT JOIN endereco E ON P.idendereco = E.idendereco
+
+ou more LEFT JOINS
+
+SELECT C.nome, C.idade, E.bairro, E.idendereco, L.LojasNomeReferencia
+FROM cliente C 
+     LEFT JOIN endereco E ON P.idendereco = C.idendereco
+     LEFT JOIN lojasReferencias L ON P.idlojasreferencias = C.idlojasreferencias
+	 
+>RIGHT JOIN
+
+SELECT nome, idade, bairro
+FROM cliente C 
+     RIGHT JOIN endereco E ON P.idendereco = E.idendereco
+
+ou more RIGHT JOINS
+
+SELECT C.nome, C.idade, E.bairro, E.idendereco, L.LojasNomeReferencia
+FROM cliente C 
+     RIGHT JOIN endereco E ON P.idendereco = C.idendereco
+     RIGHT JOIN lojasReferencias L ON P.idlojasreferencias = C.idlojasreferencias
