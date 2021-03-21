@@ -49,5 +49,8 @@ Ex. Tabelas: Membro, Realiza, Tarefa.
 
   DELETE FROM Membro WHERE id_membro=1;
     Obs: Se não definir a possibilidade de remoção na criação das tabelas, será definido por padrão  NO ACTION no ON DELETE.
+  DELETE FROM Membro WHERE nome IS NULL; -- para campos onde estão NULL não se deve usar o = (errado), mas sim o operador IS NULL / IS NOT NULL (correto).
+  DELETE FRO< Membro WHERE upper(nome) = 'ANA'; -- o postgre na estrutura não é case sensitive, mas para strings de campos é, portanto use sempre o upper ou lower.
+  
 
 
