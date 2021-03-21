@@ -1,4 +1,14 @@
-DML - Data Manipulation Language Basic.
+STRUCTURE OF SQL
+
+1. DDL - DATA DEFINITION LANGUAGE (CREATE, DROP, ALTER, TRUNCATE).
+2. DML - DATA MANIPULATION LANGUAGE (INSERT, DELETE, UPDATE).
+3. DQL - DATA MANIPULATION LANGUAGE (SELECT).
+4. DCL - DATA CONTROL LANGUAGE (GRAND, INVOKE).
+5. TCL - TRANSACTIONAL CONTROL LANGUAGE (COMMIT, ROLLBACK, SABE POINT).
+
+.........................................................................................
+
+DQL - Data Query Language.
 
 >CRUD - READ(SELECT):
 
@@ -7,6 +17,8 @@ FROM cliente
 WHERE idCliente = 1
 GROUP BY
 ORDER BY
+
+DML - Data Manipulation Language Basic.
 
 >CRUD - UPDATE
 
