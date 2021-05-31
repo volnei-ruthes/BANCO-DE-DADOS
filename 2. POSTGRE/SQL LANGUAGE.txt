@@ -8,6 +8,8 @@ STRUCTURE OF SQL
 
 .........................................................................................
 
+Create database baseteste / drop database baseteste.
+
 Ex. Tabelas: Membro, Realiza, Tarefa.
 
 1. DDL - Data Definition Language
@@ -52,5 +54,231 @@ Ex. Tabelas: Membro, Realiza, Tarefa.
   DELETE FROM Membro WHERE nome IS NULL; -- para campos onde estão NULL não se deve usar o = (errado), mas sim o operador IS NULL / IS NOT NULL (correto).
   DELETE FRO< Membro WHERE upper(nome) = 'ANA'; -- o postgre na estrutura não é case sensitive, mas para strings de campos é, portanto use sempre o upper ou lower.
   
+2.3 UPDATE
+
+  UPDATE funcionario SET nome='marioteste' WHERE id=1;
+  
+2.4 DELETE
+
+  DELETE FROM funcionario WHERE id=1;
+  
+ --------------------------------------------------------------------------------------
+ 
+3. FUNÇÕES DE AGREGAÇÕES POSTGRESQL
+
+3.1 - avg() - calcula a média aritmética sobre o conjunto de linhas fornecido.
+
+SELECT ROUND(AVG(salario),2) FROM funcionario;
+
+3.2 - count() - retorna o número de linhas de entrada para o qual a expressão é não nula ou simplesmente o total caso seja especificado “*”.
+
+SELECT COUNT(nome) FROM funcionario;
+
+3.4 - max() - retorna o maior valor entre todos os fornecidos.
+
+SELECT MAX(salario) FROM funcionario;
+
+3.5 - min() - retorna o menor valor entre todos os fornecidos.
+
+SELECT MIN(salario) FROM funcionario;
+
+3.6 - sum() - calcula a soma da expressão sobre todas as linhas de entrada.
+
+SELECT SUM(salario) FROM funcionario;
+
+-------------------------------------------------------------------------------------
+
+4. FUNCTIONS POSTGRESQL
+
+4.1 - sem parâmetro:
+
+    CREATE OR REPLACE FUNCTION olaMundo() RETURNS varchar AS
+	$$
+	DECLARE
+	  msg varchar := 'Olá Mundo!';
+	BEGIN
+	  RETURN msg;
+	END;
+	$$ LANGUAGE plpgsql;
+
+	SELECT olaMundo();
+	
+4.2 com parâmetros:
+
+	CREATE OR REPLACE FUNCTION aplicaTaxa(valor1 real, valor2 real) RETURNS real AS
+	$$
+	BEGIN
+	  RETURN (valor1 + valor2) * 0.05;
+	END;
+	$$ LANGUAGE plpgsql;
+
+	Exemplo de uso: SELECT aplicaTaxa(10,20);
+	
+4.3 com comandos DMLs:
+
+	CREATE OR REPLACE FUNCTION addFuncionario (pNome varchar, pSalario numeric) RETURNS VOID AS
+	$$
+	DECLARE
+	  --vars
+	BEGIN
+	  INSERT INTO funcionario (nome, salario) VALUES (pNome, pSalario);
+	END;
+	$$ LANGUAGE plpgsql;
+
+	Exemplo de uso: SELECT addFuncionario ('Maria', 2500);
+	
+4.4 com PARAMETROS DE SAIDAS:
+
+Ex. 4.4.1:
+
+	CREATE OR REPLACE FUNCTION MaiorMenor(pA numeric, pB numeric, pC numeric, OUT pMaior numeric, OUT pMenor numeric) RETURNS RECORD AS
+	--função passando 3 parâmetros, onde o Maior/Menor serão retornados...
+	$$
+	DECLARE
+	  --vars
+	BEGIN
+	  pMaior := GREATEST(pA,pB,pC);
+	  pMenor := LEAST(pA,pB,pC);
+	END;
+	$$ LANGUAGE plpgsql;
+
+	Exemplo de uso: SELECT * FROM MaiorMenor(10,20,30);
+	
+Ex. 4.4.2:
+
+	CREATE OR REPLACE FUNCTION MenorMaiorMedia( OUT pMenor numeric, OUT pMaior numeric, OUT pMedia numeric) RETURNS RECORD AS
+	$$
+	DECLARE
+	  --vars
+	BEGIN
+	  SELECT MIN(salario) FROM funcionario INTO pMenor;
+	  SELECT MAX(salario) FROM funcionario INTO pMaior;
+	  SELECT ROUND(AVG(salario),2) FROM funcionario INTO pMedia;
+	END;
+	$$ LANGUAGE plpgsql;
+
+	Exemplo de uso: SELECT * FROM MenorMaiorMedia();
+	
+-------------------------------------------------------------------------------------
+
+5. COMANDOS CONDICIONAIS POSTGRESQL
+
+Ex. 5.1:
+
+    CREATE OR REPLACE FUNCTION AnalisaValor(pValor real) RETURNS VARCHAR AS
+    $$
+	BEGIN
+	  IF pValor < 2 THEN
+		--posso colocar comandos DMLs aqui...
+		return 'É menor que 2';
+	  ELSEIF pValor > 2 AND pValor < 5 THEN
+	    return 'É maior que 2 e menor que 5';
+	  ELSE
+	    return 'é maior que 5';
+	  END IF;
+	END;
+	$$ LANGUAGE plpgsql;
+
+	Exemplo de uso: SELECT AnalisaValor(4);	  
+
+Ex. 5.2:
+
+    CREATE OR REPLACE FUNCTION isAcimaDaMedia(pId numeric) RETURNS boolean AS
+	$$
+	DECLARE 
+	  media real;
+	  salario_professor real;
+	BEGIN
+	  SELECT AVG(salario) from funcionario INTO media;
+	  SELECT salario FROM funcionario WHERE id = pId INTO salario_professor;
+	  
+	  IF salario_professor > media THEN	   
+		return True; 
+	  ELSE
+	    return False;
+	  END IF;
+	END;
+	$$ LANGUAGE plpgsql;
+
+	Exemplo de uso: SELECT isAcimaDaMedia(2);	
+	
+-------------------------------------------------------------------------------------
+
+6. COMANDOS REPETIÇÃO POSTGRESQL
+
+6.1 - FOR:
+
+Ex. 6.1.1: - SIMPLES:
+
+    DO 
+	$MeuFor$
+	DECLARE
+	  i int;
+	BEGIN
+	  FOR i IN 1..5 
+	  LOOP
+		RAISE NOTICE 'Contador: %', i;
+	  END LOOP;
+	END;
+	$MeuFor$
+	
+Ex. 6.1.2: - INCREMENTO DINÂMICO:
+
+    DO 
+	$MeuFor$
+	DECLARE
+	  i int;
+	BEGIN
+	  FOR i IN 1..20  BY 2 --INCREMENTA 2 EM 2
+	  LOOP
+		RAISE NOTICE 'Contador: %', i;
+	  END LOOP;
+	END;
+	$MeuFor$
+	
+Ex. 6.1.3: - REVERSE SIMPLES:
+
+	DO 
+	$MeuFor$
+	DECLARE
+	  i int;
+	BEGIN
+	  FOR i IN REVERSE 20..1  
+	  LOOP
+		RAISE NOTICE 'Contador: %', i;
+	  END LOOP;
+	END;
+	$MeuFor$
+	
+Ex. 6.1.4: - REVERSE DINÂMICO:
+
+	DO 
+	$MeuFor$
+	DECLARE
+	  i int;
+	BEGIN
+	  FOR i IN REVERSE 20..1 BY 2 
+	  LOOP
+		RAISE NOTICE 'Contador: %', i;
+	  END LOOP;
+	END;
+	$MeuFor$
+	
+6.2 - WHILE
+
+	DO 
+	$MeuWhile$
+	DECLARE
+	  i int;
+	BEGIN
+	  i := 2;
+	  WHILE i< 10 LOOP
+		RAISE NOTICE 'Contador: %', i;
+		I:= I+1;
+	  END LOOP;
+	END;
+	$MeuWhile$
+
+
 
 
