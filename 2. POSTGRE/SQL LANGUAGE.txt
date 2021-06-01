@@ -90,6 +90,8 @@ SELECT SUM(salario) FROM funcionario;
 
 4. FUNCTIONS POSTGRESQL
 
+-- DROP FUNCTION listaalunosaniversariantesmes(integer)
+
 4.1 - sem parâmetro:
 
     CREATE OR REPLACE FUNCTION olaMundo() RETURNS varchar AS
@@ -263,6 +265,90 @@ Ex. 6.1.4: - REVERSE DINÂMICO:
 	  END LOOP;
 	END;
 	$MeuFor$
+	
+Ex. 6.1.5: -  FOR NUMA QUERY 01:
+
+	CREATE OR REPLACE FUNCTION um_loop_numa_query(n integer) RETURNS varchar AS
+	$$
+	DECLARE
+	  rec RECORD;
+	BEGIN
+	  FOR rec IN SELECT nome FROM ALUNOS ORDER BY nome LIMIT n
+	  LOOP
+		RAISE NOTICE '%', rec.nome; -- % - parâmetro da variável nome dentro do record.
+	  END LOOP;
+	END;
+	$$
+	LANGUAGE plpgsql;
+
+	Exemplo de uso: SELECT um_loop_numa_query(3); 
+	
+Ex. 6.1.6: -  FOR NUMA QUERY 02:
+
+	CREATE OR REPLACE FUNCTION mostraFuncionarios() RETURNS void AS
+	$$
+	DECLARE
+	  tupla RECORD;
+	  i integer := 1;
+	BEGIN
+	  FOR tupla IN SELECT * FROM ALUNOS ORDER BY nome 
+	  LOOP
+		RAISE NOTICE 'Código: %, Aluno: %, Idade: %', i, tupla.nome, tupla.idade;   -- % - parâmetros + Variáveis.
+		i := i + 1;
+	  END LOOP;
+	END;
+	$$
+	LANGUAGE plpgsql;
+
+	Exemplo de uso: SELECT mostraFuncionarios();
+	
+Ex. 6.1.7: -  FOR NUM ARRAY:
+
+	CREATE OR REPLACE FUNCTION mostraNaturais(n integer) RETURNS INTEGER[] AS
+	$$
+	DECLARE
+	  resultado integer[];
+	  i integer;
+	BEGIN
+	  FOR i IN 1..n
+	  LOOP
+		resultado[i] := i; 	
+	  END LOOP;
+	  RETURN resultado;
+	END;
+	$$
+	LANGUAGE plpgsql;
+
+	Exemplo de uso: SELECT mostraNaturais(10);
+	
+Ex. 6.1.8: -  FOR NUM ARRAY LISTANDO ANIVERSARIANTES DO MES:
+
+	CREATE OR REPLACE FUNCTION listaAlunosAniversariantesMes(pMes integer) RETURNS varchar[] AS
+	$$
+	DECLARE
+	  resultado varchar[];
+	  tupla record;
+	  mes_aniversario int;
+	  i integer := 0;
+	BEGIN
+	  FOR tupla IN SELECT * FROM alunos
+	  LOOP
+		SELECT  EXTRACT(MONTH FROM tupla.data_nascimento)  INTO mes_aniversario; --extrai o mes da tupla e insere na variavel.
+		IF (mes_aniversario = pMes) THEN --compara o mes_aniversario se é o mesmo do parâmetro.
+		  resultado[i] := tupla.nome; --se sim, add no array o codigo do alunos.
+		  i:= i + 1;
+		END IF;	
+	  END LOOP;
+	  RETURN resultado; --retorna um array de inteiros com os IDs dos alunos
+	END;
+	$$
+	LANGUAGE plpgsql;
+
+	--DROP FUNCTION listaalunosaniversariantesmes(integer)
+
+	Exemplo de uso: SELECT listaAlunosAniversariantesMes(6);
+
+
 	
 6.2 - WHILE
 
